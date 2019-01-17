@@ -1,0 +1,333 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Final Project</title>
+    <meta name="description" content="Help Rudolph find the present in the woods before the timer runs out">
+</head>
+
+<style>
+    
+#time
+{
+    position: absolute;
+    top: 405px;
+    left: 0px;
+    background-color: crimson;
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+}    
+    
+#score
+{
+    position: absolute;
+    top: 405px;
+    left: 150px;
+    background-color: crimson;
+    color: white;
+    font-size: 24px;
+    padding: 10px;
+}    
+    
+#stage
+{
+    position: relative;
+    width: 712px;
+    height: 485px;
+}
+
+.cell
+{
+    display: block;
+    position: absolute;
+    width: 64px;
+    height: 64px;
+}
+    
+p 
+{ 
+    font-size: 20px;
+    font-family: cursive;
+    width: 500px;
+    position: absolute;
+    top: 390px;
+    left: 330px;
+}
+    
+</style>    
+
+<div id="time"></div>
+<div id ="score"></div>
+<div id= "stage"></div>
+<p id ="output"></p>       
+    
+<script>
+    
+var myTime = document.querySelector("#time");
+var myScore = document.querySelector("#score");
+
+var time = 15; 
+var score = 0;
+
+myTime.innerHTML = "TIME: " + time;
+myScore.innerHTML = "SCORE: " + score;
+
+var timer = window.setInterval(countdown, 1000);
+
+function countdown()
+{
+    //the timer will start from 15 seconds and count down
+    if(time > 0)
+    {
+        time--;
+        myTime.innerHTML = "TIME: " + time;
+    }
+    //a window will display indicating that time has run out
+    else
+    {
+        alert("TIME'S UP!");
+        window.clearInterval(timer);
+        endGame();
+    }
+}
+    
+//Get a reference to the stage and output
+var stage = document.querySelector("#stage");
+var output = document.querySelector("#output");  
+    
+//Add a keyboard listener
+window.addEventListener("keydown", keydownHandler, false);    
+    
+//The game map
+var map = 
+[
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1],
+    [1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1],
+    [1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 3, 1, 0, 1],
+    [0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+    [1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    
+];
+    
+//The game objects map
+var gameObjects =
+[
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0],
+    [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+];  
+    
+//The Map Code
+var SNOW = 0; 
+var TREE = 1;
+var RUDOLPH = 2;
+var PRESENT = 3;    
+    
+//The size of each tile cell
+var SIZE = 64;
+            
+//The # of rows and columns
+var ROWS = map.length;
+var COLUMNS = map[0].length;
+                
+//Arrow key codes
+var UP = 38;
+var DOWN = 40;
+var RIGHT = 39;
+var LEFT = 37;
+       
+//Find RUDOLPH's start position
+var rudyX;
+var rudyY;
+
+for(var row = 0; row < ROWS; row++)
+{
+    for(var column = 0; column < COLUMNS; column++)
+    {
+        if(gameObjects [row][column] === RUDOLPH)
+        {
+            rudyX = row; 
+            rudyY = column;
+        }
+    }
+}    
+
+// Create a game message while game is being played
+var gameMessage = "Help Rudolph find the missing present. Use the arrow keys to guide Rudolph!";     
+  
+//Render the game    
+render();   
+
+//Event Handler when the arrow keys are pressed
+function keydownHandler(event)
+{ 
+    //alert("keyCode = " + event.keyCode);
+    switch(event.keyCode)
+    {
+        case UP:
+            //find out if Rudolph's move will be within the maze
+            if(rudyX > 0)
+            {
+                //If it is, clear Rudolph's current cell
+                gameObjects[rudyX][rudyY] = 0;
+                map[rudyX][rudyY] = 0;
+                //Subtract 1 from Rudolph's row to move it up one row on the map
+                rudyX--;
+                console.log("Position: " + rudyX);
+                //Apply Rudolph's new updated position to the array
+                gameObjects[rudyX][rudyY] = RUDOLPH;
+            }
+          break;            
+        
+        case DOWN:   
+            if (rudyX < ROWS - 1)
+            {
+                
+                gameObjects[rudyX][rudyY] = 0;
+                map[rudyX][rudyY] = 0;
+                rudyX++;
+                gameObjects[rudyX][rudyY] = RUDOLPH;
+            }
+            break;
+            
+        case LEFT: 
+            if (rudyY > 0)
+            {
+                gameObjects[rudyX][rudyY] = 0;
+                map[rudyX][rudyY] = 0;
+                //Subtract 1 from Rudolph's column to move it up one column on the map
+                rudyY--;
+                //Apply Rudolph's new updated position to the array
+                gameObjects[rudyX][rudyY] = RUDOLPH;
+            }            
+            break;
+            
+        case RIGHT: 
+            if (rudyY < COLUMNS - 1)
+            {
+                gameObjects[rudyX][rudyY] = 0;
+                map[rudyX][rudyY] = 0;
+                rudyY++;
+                gameObjects[rudyX][rudyY] = RUDOLPH;
+            }           
+            break;
+    }
+
+    //Find out what kind of cell Rudolph is on 
+    switch(map[rudyX][rudyY])
+    {       
+        case TREE:
+           gameMessage = "OH NO! You hit the tree!";
+            endGame();
+            break;
+        
+        case SNOW:
+            gameMessage;
+            break;
+        
+        case PRESENT:
+            endGame();            
+            break;       
+    }
+    
+    //Render the game
+    render();
+}    
+    
+//End the game when Rudolph hits either the present or the tree  
+function endGame()
+{
+    // When Rudolph hits the present
+    if (map[rudyX][rudyY] === PRESENT)
+    {   
+        //The player wins
+        gameMessage = " You WON! Now you can deliver it to the little kids! Wanna play again? Just refresh the browser!"; 
+        
+        //Add a score of 100 points
+        score = 100;
+        myScore.innerHTML = "SCORE: " + score;
+    }
+    
+    // When Rudolph hits one of the trees
+    else
+    {        
+        if(map[rudyX][rudyY] === TREE)
+        {
+            //The player loses
+            gameMessage += " You LOST the game. Refresh the browser and Try again!";
+        }
+    }
+    
+    //Remove the keyboard listener to end the game
+    window.removeEventListener("keydown", keydownHandler, false);
+}    
+    
+function render()
+{
+    //Clear the stage of img cells from the previous turn
+    
+    if (stage.hasChildNodes())
+    {
+        for (var i = 0; i < ROWS * COLUMNS; i++)
+        {
+            stage.removeChild(stage.firstChild);
+        }
+    }    
+        //Render the game by looping through the map arrays
+        for (var row = 0; row < ROWS; row++)
+        {
+            for (var column = 0; column < COLUMNS; column++)
+            {
+                //Create an img tag called cell
+                var cell = document.createElement("img");
+                
+                //Set its CSS class to cell
+                cell.setAttribute("class", "cell");
+                
+                //Add the img tag to the <div id="stage"> tag
+                stage.appendChild(cell);
+                
+                //Find the correct image for this map cell
+                switch(map[row][column])
+                {
+                    case SNOW:
+                        cell.src = "images/snow.png";
+                        break;
+                    case TREE:
+                        cell.src = "images/Tree.png";
+                        break;
+                    case PRESENT:
+                        cell.src = "images/present.png";
+                        break;
+                }
+                
+                //Add Rudolph from the gameObjects array
+                switch(gameObjects[row][column])
+                {
+                    case RUDOLPH:
+                        cell.src = "images/rudolph.png";
+                        break;
+                }
+                
+                //Position the cell
+                cell.style.top = row * SIZE + "px";
+                cell.style.left = column * SIZE + "px";
+            }
+        }
+        
+        //Display the game message
+        output.innerHTML = gameMessage;
+        
+}
+       
+</script>    
+
+</html>
+
+
+
